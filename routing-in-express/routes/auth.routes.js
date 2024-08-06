@@ -1,7 +1,7 @@
-const { router } = require('express');
+const { Router } = require('express');
 const passport = require('passport');
 
-const authRouter = router();
+const authRouter = Router();
 authRouter.get('./login', (req, res) => {
     res.render("login");
 });
