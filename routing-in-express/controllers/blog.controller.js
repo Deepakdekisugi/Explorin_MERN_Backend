@@ -19,7 +19,7 @@ const blogCreatePost = async (req, res) => {
   const { title, body } = req.body;
 
   if (title && body) {
-    const blog = new Blog({ body, title });
+    const blog = new Blog({ body, title, author: req.author._id });
     try {
       await blog.save();
       res.redirect("/blog");
@@ -41,7 +41,14 @@ const blogEditGet = (req, res) => {
   const { id } = req.params;
 
   Blog.findById(id)
-    .then((blog) => res.render("blog/edit", { blog }))
+    .then((blog) => {
+      if(blog.author === req.author._id)
+      res.render("blog/edit", { blog });
+    else{
+      req.flash("error_msg", "Not Authorized");
+      req.redirect("/blog");
+    }
+    })
     .catch((err) => console.error(err));
 };
 const blogEditPut = (req, res) => {
@@ -50,9 +57,24 @@ const blogEditPut = (req, res) => {
   const { body, title } = req.body;
 
   if (body && title) {
-    Blog.findByIdAndUpdate(id, { body, title })
-      .then((_) => res.redirect(`/blog/${id}`))
-      .catch((err) => console.error(err));
+    Blog.findById(id)
+    .than((blog) => {
+      if(blog.author === req.author._id){
+        blog.title = title;
+        blog.body = body;
+        blog
+        .save()
+        .than(() => res.redirect(`/blog/${id}`))
+        .catch((err) => {
+          console.error(err);
+          res.status(500).send();
+        })
+      }else {
+        req.flash("error_msg",  "Not Authorized");
+        res.redirect("/blog");
+      }
+    })
+    .catch((err) => console.error(err));
   }
 };
 

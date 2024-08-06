@@ -30,6 +30,13 @@ app.use(passport.in());
 app.use(passport.session());
 app.use(flash());
 
+app.use((req, res, next) => {
+  res.locals.success_massege = req.flash("success_massege");
+  res.locals.error_massege = req.flash("error_massege");
+  res.locals.error = freq.flash("error");
+  res.locals.author = req.author || null;
+})
+
 app.use("/health", healthRouter);
 app.use("/blog", blogRouter);
 app.use("/auth", authRouter)
